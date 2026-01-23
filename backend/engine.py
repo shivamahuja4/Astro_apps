@@ -118,6 +118,27 @@ def calculate_positions(dt: datetime):
             "retrograde": is_retrograde
         })
         
+        
+    # Calculate Ascendant (Lagna) - Using New Delhi as default for IST
+    lat = 28.6139
+    lon = 77.2090
+    
+    # swe.houses returns (cusps, ascmc)
+    # ascmc[0] is Ascendant
+    cusps, ascmc = swe.houses(jd, lat, lon, b'P')
+    asc_deg = ascmc[0]
+    
+    asc_sign_index = int(asc_deg / 30)
+    asc_degree_in_sign = asc_deg % 30
+    
+    positions.append({
+        "name": "Ascendant",
+        "full_degree": asc_deg,
+        "sign": ZODIAC_SIGNS[asc_sign_index],
+        "degree_str": format_degree(asc_degree_in_sign),
+        "retrograde": False
+    })
+
     return positions
 
 

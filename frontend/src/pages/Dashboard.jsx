@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchCurrentPositions } from '../services/api';
 import { RefreshCw } from 'lucide-react';
+import ZodiacChart from '../components/ZodiacChart';
 
 export default function Dashboard() {
     const [data, setData] = useState(null);
@@ -52,11 +53,21 @@ export default function Dashboard() {
                 </button>
             </div>
 
-            {/* Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                {data?.positions.map((planet) => (
-                    <PlanetCard key={planet.name} planet={planet} />
-                ))}
+            {/* Zodiac Chart */}
+            <div className="flex justify-center py-4">
+                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6">
+                    <ZodiacChart positions={data?.positions} />
+                </div>
+            </div>
+
+            {/* Positions Grid */}
+            <div>
+                <h2 className="text-lg font-medium text-white/70 mb-4">Detailed Positions</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                    {data?.positions.map((planet) => (
+                        <PlanetCard key={planet.name} planet={planet} />
+                    ))}
+                </div>
             </div>
         </div>
     );
