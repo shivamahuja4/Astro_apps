@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { fetchCalendar } from '../services/api';
-import { Loader2, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Calendar() {
-    const [date, setDate] = useState(new Date()); // Use date to track year/month
+    const [date, setDate] = useState(new Date());
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
 
     const year = date.getFullYear();
-    const month = date.getMonth() + 1; // JS months are 0-11
+    const month = date.getMonth() + 1;
 
     const loadData = async () => {
         setLoading(true);
@@ -34,70 +34,70 @@ export default function Calendar() {
         });
     };
 
-    return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-                <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                    <CalendarIcon className="h-8 w-8 text-purple-400" />
-                    Astrological Calendar
-                </h1>
+    const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
 
-                <div className="flex items-center gap-4 bg-slate-900 rounded-lg p-1 px-2 border border-white/10">
+    return (
+        <div className="space-y-8">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h1 className="text-2xl font-semibold text-white tracking-tight">Calendar</h1>
+
+                {/* Month selector */}
+                <div className="flex items-center gap-1 bg-white/[0.04] rounded-lg p-1 border border-white/[0.06]">
                     <button
                         onClick={() => changeMonth(-1)}
-                        className="p-2 hover:bg-white/5 rounded-md text-slate-400 hover:text-white"
+                        className="p-2 hover:bg-white/[0.06] rounded-md text-white/50 hover:text-white transition-colors"
                     >
-                        <ChevronLeft className="h-5 w-5" />
+                        <ChevronLeft className="h-4 w-4" />
                     </button>
-                    <span className="font-medium text-lg w-40 text-center">
-                        {date.toLocaleString('default', { month: 'long', year: 'numeric' })}
-                    </span>
+                    <span className="text-sm w-36 text-center text-white/80">{monthName}</span>
                     <button
                         onClick={() => changeMonth(1)}
-                        className="p-2 hover:bg-white/5 rounded-md text-slate-400 hover:text-white"
+                        className="p-2 hover:bg-white/[0.06] rounded-md text-white/50 hover:text-white transition-colors"
                     >
-                        <ChevronRight className="h-5 w-5" />
+                        <ChevronRight className="h-4 w-4" />
                     </button>
                 </div>
             </div>
 
+            {/* Content */}
             {loading ? (
-                <div className="flex h-64 items-center justify-center text-slate-400"><Loader2 className="animate-spin h-8 w-8" /></div>
+                <div className="flex h-64 items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+                </div>
+            ) : data.length === 0 ? (
+                <div className="text-center py-16 text-white/40">
+                    No events found for this month.
+                </div>
             ) : (
-                <div className="overflow-hidden bg-slate-900/30 border border-white/5 rounded-xl">
-                    <table className="min-w-full divide-y divide-white/5">
-                        <thead className="bg-white/5">
-                            <tr>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Date & Time (IST)</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Event</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Type</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Position/Degree</th>
+                <div className="overflow-hidden rounded-xl border border-white/[0.06]">
+                    <table className="min-w-full">
+                        <thead>
+                            <tr className="bg-white/[0.02] border-b border-white/[0.04]">
+                                <th className="px-5 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider">Date</th>
+                                <th className="px-5 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider">Event</th>
+                                <th className="px-5 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider hidden sm:table-cell">Type</th>
+                                <th className="px-5 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider hidden md:table-cell">Position</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
-                            {data.length === 0 ? (
-                                <tr>
-                                    <td colSpan="4" className="px-6 py-12 text-center text-slate-500">No major events found for this month.</td>
+                        <tbody className="divide-y divide-white/[0.04]">
+                            {data.map((event, idx) => (
+                                <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
+                                    <td className="px-5 py-4 whitespace-nowrap">
+                                        <p className="text-sm text-white/80">{event.display_date}</p>
+                                        <p className="text-xs text-white/30">{event.time} IST</p>
+                                    </td>
+                                    <td className="px-5 py-4 whitespace-nowrap">
+                                        <p className="text-sm font-medium text-white/90">{event.event_name}</p>
+                                    </td>
+                                    <td className="px-5 py-4 whitespace-nowrap hidden sm:table-cell">
+                                        <EventBadge type={event.type} />
+                                    </td>
+                                    <td className="px-5 py-4 whitespace-nowrap hidden md:table-cell">
+                                        <p className="text-sm font-mono text-white/50">{event.degree}</p>
+                                    </td>
                                 </tr>
-                            ) : (
-                                data.map((event, idx) => (
-                                    <tr key={idx} className="hover:bg-white/5 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
-                                            <div className="font-medium text-white">{event.display_date}</div>
-                                            <div className="text-slate-500 text-xs">{event.time}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-amber-50">
-                                            {event.event_name}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                            <Badge type={event.type} />
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-400 tracking-tight">
-                                            {event.degree}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
+                            ))}
                         </tbody>
                     </table>
                 </div>
@@ -106,10 +106,26 @@ export default function Calendar() {
     );
 }
 
-function Badge({ type }) {
-    if (type.includes('Conjunction')) return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-400">Conjunction</span>;
-    if (type.includes('Opposition')) return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400">Opposition</span>;
-    if (type.includes('Trine')) return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400">Trine</span>;
-    if (type.includes('Retrograde')) return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400">Retrograde</span>;
-    return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-500/10 text-slate-400">{type}</span>;
+function EventBadge({ type }) {
+    const getStyle = () => {
+        if (type.includes('Conjunction')) return 'bg-amber-500/10 text-amber-400/80 border-amber-500/20';
+        if (type.includes('Opposition')) return 'bg-rose-500/10 text-rose-400/80 border-rose-500/20';
+        if (type.includes('Trine')) return 'bg-sky-500/10 text-sky-400/80 border-sky-500/20';
+        if (type.includes('Retrograde')) return 'bg-violet-500/10 text-violet-400/80 border-violet-500/20';
+        return 'bg-white/[0.06] text-white/50 border-white/10';
+    };
+
+    const getLabel = () => {
+        if (type.includes('Conjunction')) return 'Conjunction';
+        if (type.includes('Opposition')) return 'Opposition';
+        if (type.includes('Trine')) return 'Trine';
+        if (type.includes('Retrograde')) return 'Retrograde';
+        return type;
+    };
+
+    return (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStyle()}`}>
+            {getLabel()}
+        </span>
+    );
 }

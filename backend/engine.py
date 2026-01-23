@@ -375,8 +375,8 @@ def calculate_monthly_events(year: int, month: int):
             p, _ = get_planet_position_speed(next_jd, name, pid)
             next_positions[name] = p
             
-        # Check pairs
-        names = list(PLANETS.keys())
+        # Check pairs (exclude Moon to reduce noise in calendar)
+        names = [n for n in PLANETS.keys() if n != 'Moon']
         for i in range(len(names)):
             for j in range(i + 1, len(names)):
                 p1 = names[i]
