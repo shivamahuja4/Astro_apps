@@ -459,6 +459,94 @@ def calculate_monthly_events(year: int, month: int):
         
         prev_positions = next_positions
         current_jd = next_jd
+    
+    # 3. TRANSITS (Sign Changes) - Exclude Moon
+    # Step through the month to detect when planets change signs
+    
+    transit_planets = [(n, p) for n, p in PLANETS.items() if n != 'Moon']
+    
+    for name, pid in transit_planets:
+        current_jd = start_jd
+        
+        # Get initial position and sign
+        if name == 'Ketu':
+            rahu_pos = swe.calc_ut(current_jd, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+            curr_pos = (rahu_pos + 180) % 360
+        else:
+            curr_pos = swe.calc_ut(current_jd, pid, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+        
+        curr_sign = get_sign_from_longitude(curr_pos)
+        
+        # Step size: 1 day for most planets
+        step = 1.0
+        
+        while current_jd < end_jd:
+            next_jd = current_jd + step
+            
+            if name == 'Ketu':
+                rahu_pos = swe.calc_ut(next_jd, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                next_pos = (rahu_pos + 180) % 360
+            else:
+                next_pos = swe.calc_ut(next_jd, pid, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+            
+            next_sign = get_sign_from_longitude(next_pos)
+            
+            if curr_sign != next_sign:
+                # Sign change detected! Binary search for precise time
+                left, right = current_jd, next_jd
+                ingress_jd = right
+                target_sign = next_sign
+                
+                for _ in range(10):
+                    mid = (left + right) / 2
+                    if name == 'Ketu':
+                        r_p = swe.calc_ut(mid, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                        mid_pos = (r_p + 180) % 360
+                    else:
+                        mid_pos = swe.calc_ut(mid, pid, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                    
+                    mid_sign = get_sign_from_longitude(mid_pos)
+                    
+                    if mid_sign == target_sign:
+                        right = mid
+                        ingress_jd = mid
+                    else:
+                        left = mid
+                
+                # Convert to datetime
+                dt_ingress = swe.revjul(ingress_jd)
+                year_i, month_i, day_i, hour_float = dt_ingress[0], dt_ingress[1], dt_ingress[2], dt_ingress[3]
+                
+                h = int(hour_float)
+                m = int((hour_float - h) * 60)
+                s = int(((hour_float - h) * 60 - m) * 60)
+                
+                ingress_dt_utc = datetime(year_i, month_i, day_i, h, m, s, tzinfo=pytz.utc)
+                ist_date = ingress_dt_utc.astimezone(pytz.timezone('Asia/Kolkata'))
+                
+                # Get position for degree display
+                if name == 'Ketu':
+                    r_p = swe.calc_ut(ingress_jd, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                    pos_at_ingress = (r_p + 180) % 360
+                else:
+                    pos_at_ingress = swe.calc_ut(ingress_jd, pid, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                
+                deg_str = format_degree(pos_at_ingress % 30)
+                sign_str = ZODIAC_SIGNS[next_sign]
+                
+                events.append({
+                    "date": ist_date.isoformat(),
+                    "display_date": ist_date.strftime("%d %b %Y"),
+                    "time": ist_date.strftime("%I:%M %p"),
+                    "type": "Transit",
+                    "event_name": f"{name} enters {sign_str}",
+                    "degree": f"{sign_str} {deg_str}"
+                })
+                
+                curr_sign = next_sign
+            
+            current_jd = next_jd
+            curr_pos = next_pos
         
     events.sort(key=lambda x: x['date'])
     return events

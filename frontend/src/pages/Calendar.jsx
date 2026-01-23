@@ -112,6 +112,7 @@ function EventBadge({ type }) {
         if (type.includes('Opposition')) return 'bg-rose-500/10 text-rose-400/80 border-rose-500/20';
         if (type.includes('Trine')) return 'bg-sky-500/10 text-sky-400/80 border-sky-500/20';
         if (type.includes('Retrograde')) return 'bg-violet-500/10 text-violet-400/80 border-violet-500/20';
+        if (type.includes('Transit')) return 'bg-teal-500/10 text-teal-400/80 border-teal-500/20';
         return 'bg-white/[0.06] text-white/50 border-white/10';
     };
 
@@ -120,6 +121,7 @@ function EventBadge({ type }) {
         if (type.includes('Opposition')) return 'Opposition';
         if (type.includes('Trine')) return 'Trine';
         if (type.includes('Retrograde')) return 'Retrograde';
+        if (type.includes('Transit')) return 'Transit';
         return type;
     };
 
