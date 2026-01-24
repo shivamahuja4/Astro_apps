@@ -45,8 +45,8 @@ function NavLink({ to, children }) {
         <Link
             to={to}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${isActive
-                    ? 'bg-white/[0.08] text-white'
-                    : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04]'
+                ? 'bg-white/[0.08] text-white'
+                : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04]'
                 }`}
         >
             {children}

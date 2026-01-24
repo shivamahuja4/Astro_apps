@@ -50,7 +50,7 @@ def calculate_positions(dt: datetime):
     jd = get_julian_day(dt)
     
     # Set Sidereal Mode (Lahiri)
-    swe.set_sid_mode(swe.SIDM_LAHIRI)
+    swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
     
     positions = []
     
@@ -123,9 +123,10 @@ def calculate_positions(dt: datetime):
     lat = 28.6139
     lon = 77.2090
     
-    # swe.houses returns (cusps, ascmc)
+    # swe.houses_ex returns (cusps, ascmc)
     # ascmc[0] is Ascendant
-    cusps, ascmc = swe.houses(jd, lat, lon, b'P')
+    flags_houses = swe.FLG_SIDEREAL | swe.FLG_SWIEPH
+    cusps, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags_houses)
     asc_deg = ascmc[0]
     
     asc_sign_index = int(asc_deg / 30)
@@ -151,7 +152,7 @@ def calculate_transits(year: int, planet_name: str = None):
     If planet_name is provided, calculate only for that planet.
     Otherwise calculate for all planets (excluding Moon if year view).
     """
-    swe.set_sid_mode(swe.SIDM_LAHIRI)
+    swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
     
     start_date = datetime(year, 1, 1, tzinfo=pytz.utc)
     end_date = datetime(year + 1, 1, 1, tzinfo=pytz.utc)
@@ -292,7 +293,7 @@ def calculate_monthly_events(year: int, month: int):
     - Aspects (Conjunction 0, Trine 120, Opposition 180)
     - Retrograde movements (Start/End)
     """
-    swe.set_sid_mode(swe.SIDM_LAHIRI)
+    swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
     
     # Range: from 1st of month to 1st of next month
     start_date = datetime(year, month, 1, tzinfo=pytz.utc)
