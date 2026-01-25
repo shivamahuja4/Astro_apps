@@ -89,6 +89,37 @@ export default function ZodiacChart({ positions }) {
                 {/* Center dot */}
                 <circle cx={center} cy={center} r="8" fill="rgba(147, 197, 253, 0.5)" />
 
+                {/* Nakshatras (27 divisions) */}
+                {[...Array(27)].map((_, i) => {
+                    const nakAngle = (360 / 27);
+                    const startAngle = -90 - (ascIndex * 30) + (i * nakAngle);
+                    const midAngle = startAngle + nakAngle / 2;
+
+                    const innerP = polarToCartesian(startAngle, middleRadius - 8);
+                    const outerP = polarToCartesian(startAngle, middleRadius + 5);
+                    const labelP = polarToCartesian(midAngle, middleRadius - 4);
+
+                    return (
+                        <g key={i}>
+                            <line
+                                x1={innerP.x} y1={innerP.y}
+                                x2={outerP.x} y2={outerP.y}
+                                stroke="rgba(255,255,255,0.15)"
+                                strokeWidth="0.5"
+                            />
+                            <text
+                                x={labelP.x} y={labelP.y}
+                                textAnchor="middle"
+                                dominantBaseline="middle"
+                                className="fill-white/40 text-[7px] font-light"
+                                transform={`rotate(${midAngle + 90}, ${labelP.x}, ${labelP.y})`}
+                            >
+                                {i + 1}
+                            </text>
+                        </g>
+                    );
+                })}
+
                 {/* Sign segments */}
                 {SIGN_ORDER.map((sign, idx) => {
                     const angles = getSegmentAngles(idx);
@@ -143,18 +174,6 @@ export default function ZodiacChart({ positions }) {
                             >
                                 {houseNum}
                             </text>
-
-                            {/* Degree (if planets present) */}
-                            {avgDegree !== null && (
-                                <text
-                                    x={degreePoint.x} y={degreePoint.y}
-                                    textAnchor="middle"
-                                    dominantBaseline="middle"
-                                    className="fill-white/25 text-[9px]"
-                                >
-                                    {avgDegree}°
-                                </text>
-                            )}
 
                             {/* Planets in this sign */}
                             {planetsInSign.map((planet, pIdx) => {

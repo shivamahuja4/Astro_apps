@@ -23,6 +23,14 @@ ZODIAC_SIGNS = [
     "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
 ]
 
+NAKSHATRAS = [
+    "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra",
+    "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni",
+    "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha",
+    "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha",
+    "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"
+]
+
 def format_degree(degree_float):
     """Converts a float degree to Degree, Minute, Second string."""
     d = int(degree_float)
@@ -75,12 +83,15 @@ def calculate_positions(dt: datetime):
             
             sign_index = int(ketu_pos / 30)
             degree_in_sign = ketu_pos % 30
+            nakshatra_index = int(ketu_pos / (360/27))
             
             positions.append({
                 "name": "Ketu",
                 "full_degree": ketu_pos,
                 "sign": ZODIAC_SIGNS[sign_index],
                 "degree_str": format_degree(degree_in_sign),
+                "nakshatra_index": nakshatra_index + 1,
+                "nakshatra_name": NAKSHATRAS[nakshatra_index],
                 "retrograde": True # Nodes are always retrograde (Mean nodes)
             })
             continue
@@ -108,6 +119,7 @@ def calculate_positions(dt: datetime):
         
         sign_index = int(lon / 30)
         degree_in_sign = lon % 30
+        nakshatra_index = int(lon / (360/27))
         is_retrograde = speed < 0
         
         positions.append({
@@ -115,6 +127,8 @@ def calculate_positions(dt: datetime):
             "full_degree": lon,
             "sign": ZODIAC_SIGNS[sign_index],
             "degree_str": format_degree(degree_in_sign),
+            "nakshatra_index": nakshatra_index + 1,
+            "nakshatra_name": NAKSHATRAS[nakshatra_index],
             "retrograde": is_retrograde
         })
         
@@ -131,12 +145,15 @@ def calculate_positions(dt: datetime):
     
     asc_sign_index = int(asc_deg / 30)
     asc_degree_in_sign = asc_deg % 30
+    asc_nakshatra_index = int(asc_deg / (360/27))
     
     positions.append({
         "name": "Ascendant",
         "full_degree": asc_deg,
         "sign": ZODIAC_SIGNS[asc_sign_index],
         "degree_str": format_degree(asc_degree_in_sign),
+        "nakshatra_index": asc_nakshatra_index + 1,
+        "nakshatra_name": NAKSHATRAS[asc_nakshatra_index],
         "retrograde": False
     })
 
