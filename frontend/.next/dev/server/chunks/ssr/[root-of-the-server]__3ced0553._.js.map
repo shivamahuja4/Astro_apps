@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 28, "column": 0}, "map": {"version":3,"sources":["file:///Users/shivamahuja/Documents/Astro_apps/frontend/components/NavLink.jsx"],"sourcesContent":["'use client';\n\nimport Link from 'next/link';\nimport { usePathname } from 'next/navigation';\n\nexport default function NavLink({ href, children }) {\n    const pathname = usePathname();\n    const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));\n\n    return (\n        <Link\n            href={href}\n            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${isActive\n                ? 'bg-white/[0.08] text-white'\n                : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04]'\n                }`}\n        >\n            {children}\n        </Link>\n    );\n}\n"],"names":[],"mappings":";;;;;AAEA;AACA;AAHA;;;;AAKe,SAAS,QAAQ,EAAE,IAAI,EAAE,QAAQ,EAAE;IAC9C,MAAM,WAAW,IAAA,iJAAW;IAC5B,MAAM,WAAW,aAAa,QAAS,SAAS,OAAO,SAAS,UAAU,CAAC;IAE3E,qBACI,8OAAC,uKAAI;QACD,MAAM;QACN,WAAW,CAAC,yEAAyE,EAAE,WACjF,+BACA,2DACA;kBAEL;;;;;;AAGb"}}]
+}
