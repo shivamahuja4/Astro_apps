@@ -8,4 +8,4 @@ services:
     region: singapore # Or your preferred region
     envVars:
       - key: PORT
-        fromPort: 8000
+        value: 8000
