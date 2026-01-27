@@ -10,7 +10,7 @@ __turbopack_context__.s([
     "fetchTransits",
     ()=>fetchTransits
 ]);
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = ("TURBOPACK compile-time value", "http://127.0.0.1:8000/api") || 'http://127.0.0.1:8000/api';
 const fetchCurrentPositions = async ()=>{
     const response = await fetch(`${API_BASE_URL}/current`);
     return response.json();
