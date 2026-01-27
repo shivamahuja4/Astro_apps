@@ -137,7 +137,7 @@ export default function ZodiacChart({ positions }) {
                     const planetsInSign = planetsBySign[sign] || [];
 
                     // Calculate average degree for display (excluding Ascendant deg usually? or include? include matches visual)
-                    const planetsForDeg = planetsInSign.filter(p => p.name !== 'Ascendant');
+                    // const planetsForDeg = planetsInSign.filter(p => p.name !== 'Ascendant');
                     // const avgDegree = planetsForDeg.length > 0
                     //     ? Math.round(planetsForDeg.reduce((sum, p) => sum + (p.full_degree % 30), 0) / planetsForDeg.length)
                     //     : null;

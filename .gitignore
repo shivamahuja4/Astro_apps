@@ -1,0 +1,19 @@
+# Common
+.DS_Store
+*.log
+.env
+.env.local
+.env.*.local
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/dist/
+
+# Backend
+backend/__pycache__/
+backend/.venv/
+backend/*.pyc
+backend/.pytest_cache/
+backend/instance/
+backend/.webassets-cache/
