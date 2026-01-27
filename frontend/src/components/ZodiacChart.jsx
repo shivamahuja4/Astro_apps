@@ -127,7 +127,7 @@ export default function ZodiacChart({ positions }) {
                     const angles = getSegmentAngles(idx);
                     const midPoint = polarToCartesian(angles.mid, (outerRadius + middleRadius) / 2);
                     const houseNumPoint = polarToCartesian(angles.mid, (middleRadius + innerRadius) / 2);
-                    const degreePoint = polarToCartesian(angles.mid, innerRadius - 15);
+                    // const degreePoint = polarToCartesian(angles.mid, innerRadius - 15);
 
                     // Draw segment lines
                     const innerPoint = polarToCartesian(angles.start, innerRadius);
@@ -137,10 +137,10 @@ export default function ZodiacChart({ positions }) {
                     const planetsInSign = planetsBySign[sign] || [];
 
                     // Calculate average degree for display (excluding Ascendant deg usually? or include? include matches visual)
-                    const planetsForDeg = planetsInSign.filter(p => p.name !== 'Ascendant');
-                    const avgDegree = planetsForDeg.length > 0
-                        ? Math.round(planetsForDeg.reduce((sum, p) => sum + (p.full_degree % 30), 0) / planetsForDeg.length)
-                        : null;
+                    // const planetsForDeg = planetsInSign.filter(p => p.name !== 'Ascendant');
+                    // const avgDegree = planetsForDeg.length > 0
+                    //     ? Math.round(planetsForDeg.reduce((sum, p) => sum + (p.full_degree % 30), 0) / planetsForDeg.length)
+                    //     : null;
 
                     // Determine House Number relative to Ascendant
                     // 1st House = Ascendant Sign

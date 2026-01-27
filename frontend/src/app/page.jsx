@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { fetchCurrentPositions } from '../services/api';
 import { RefreshCw } from 'lucide-react';
 import ZodiacChart from '../components/ZodiacChart';
@@ -9,7 +9,7 @@ export default function Dashboard() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         try {
             const res = await fetchCurrentPositions();
@@ -19,11 +19,11 @@ export default function Dashboard() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [loadData]);
 
     if (loading && !data) {
         return (

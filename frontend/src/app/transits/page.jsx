@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { fetchTransits } from '../../services/api';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -12,7 +12,7 @@ export default function Transits() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         try {
             const res = await fetchTransits(year, selectedPlanet || undefined);
@@ -22,11 +22,11 @@ export default function Transits() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [year, selectedPlanet]);
 
     useEffect(() => {
         loadData();
-    }, [year, selectedPlanet]);
+    }, [loadData]);
 
     return (
         <div className="space-y-8">
