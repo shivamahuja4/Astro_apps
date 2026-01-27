@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: astro-backend
+    env: docker
+    dockerContext: backend
+    dockerfilePath: backend/Dockerfile
+    plan: free
+    region: singapore # Or your preferred region
+    envVars:
+      - key: PORT
+        value: 8000
