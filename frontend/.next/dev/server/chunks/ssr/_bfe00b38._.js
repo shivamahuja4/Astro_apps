@@ -246,7 +246,7 @@ function ZodiacChart({ positions }) {
                         const angles = getSegmentAngles(idx);
                         const midPoint = polarToCartesian(angles.mid, (outerRadius + middleRadius) / 2);
                         const houseNumPoint = polarToCartesian(angles.mid, (middleRadius + innerRadius) / 2);
-                        const degreePoint = polarToCartesian(angles.mid, innerRadius - 15);
+                        // const degreePoint = polarToCartesian(angles.mid, innerRadius - 15);
                         // Draw segment lines
                         const innerPoint = polarToCartesian(angles.start, innerRadius);
                         const outerPoint = polarToCartesian(angles.start, outerRadius);
@@ -254,7 +254,9 @@ function ZodiacChart({ positions }) {
                         const planetsInSign = planetsBySign[sign] || [];
                         // Calculate average degree for display (excluding Ascendant deg usually? or include? include matches visual)
                         const planetsForDeg = planetsInSign.filter((p)=>p.name !== 'Ascendant');
-                        const avgDegree = planetsForDeg.length > 0 ? Math.round(planetsForDeg.reduce((sum, p)=>sum + p.full_degree % 30, 0) / planetsForDeg.length) : null;
+                        // const avgDegree = planetsForDeg.length > 0
+                        //     ? Math.round(planetsForDeg.reduce((sum, p) => sum + (p.full_degree % 30), 0) / planetsForDeg.length)
+                        //     : null;
                         // Determine House Number relative to Ascendant
                         // 1st House = Ascendant Sign
                         // House = (Sign Index - Asc Index + 12) % 12 + 1
@@ -428,7 +430,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ZodiacC
 function Dashboard() {
     const [data, setData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
-    const loadData = async ()=>{
+    const loadData = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCallback"])(async ()=>{
         setLoading(true);
         try {
             const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["fetchCurrentPositions"])();
@@ -438,10 +440,12 @@ function Dashboard() {
         } finally{
             setLoading(false);
         }
-    };
+    }, []);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         loadData();
-    }, []);
+    }, [
+        loadData
+    ]);
     if (loading && !data) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
             className: "flex h-80 items-center justify-center",

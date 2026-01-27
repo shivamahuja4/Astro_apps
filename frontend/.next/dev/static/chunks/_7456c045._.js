@@ -56,24 +56,28 @@ function Calendar() {
     const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
-    const loadData = async ()=>{
-        setLoading(true);
-        try {
-            const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["fetchCalendar"])(year, month);
-            setData(res.events);
-        } catch (e) {
-            console.error(e);
-        } finally{
-            setLoading(false);
+    const loadData = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "Calendar.useCallback[loadData]": async ()=>{
+            setLoading(true);
+            try {
+                const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["fetchCalendar"])(year, month);
+                setData(res.events);
+            } catch (e) {
+                console.error(e);
+            } finally{
+                setLoading(false);
+            }
         }
-    };
+    }["Calendar.useCallback[loadData]"], [
+        year,
+        month
+    ]);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "Calendar.useEffect": ()=>{
             loadData();
         }
     }["Calendar.useEffect"], [
-        year,
-        month
+        loadData
     ]);
     const changeMonth = (delta)=>{
         setDate((d)=>{
@@ -331,7 +335,7 @@ function Calendar() {
         columnNumber: 9
     }, this);
 }
-_s(Calendar, "ZLTuwz1VygRxX6mFDchNI9qWzow=");
+_s(Calendar, "IyUCilx8luHUqnRMTO0FbXOFtrY=");
 _c = Calendar;
 function EventBadge({ type }) {
     const getStyle = ()=>{

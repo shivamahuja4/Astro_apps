@@ -250,7 +250,7 @@ function ZodiacChart({ positions }) {
                         const angles = getSegmentAngles(idx);
                         const midPoint = polarToCartesian(angles.mid, (outerRadius + middleRadius) / 2);
                         const houseNumPoint = polarToCartesian(angles.mid, (middleRadius + innerRadius) / 2);
-                        const degreePoint = polarToCartesian(angles.mid, innerRadius - 15);
+                        // const degreePoint = polarToCartesian(angles.mid, innerRadius - 15);
                         // Draw segment lines
                         const innerPoint = polarToCartesian(angles.start, innerRadius);
                         const outerPoint = polarToCartesian(angles.start, outerRadius);
@@ -258,7 +258,9 @@ function ZodiacChart({ positions }) {
                         const planetsInSign = planetsBySign[sign] || [];
                         // Calculate average degree for display (excluding Ascendant deg usually? or include? include matches visual)
                         const planetsForDeg = planetsInSign.filter((p)=>p.name !== 'Ascendant');
-                        const avgDegree = planetsForDeg.length > 0 ? Math.round(planetsForDeg.reduce((sum, p)=>sum + p.full_degree % 30, 0) / planetsForDeg.length) : null;
+                        // const avgDegree = planetsForDeg.length > 0
+                        //     ? Math.round(planetsForDeg.reduce((sum, p) => sum + (p.full_degree % 30), 0) / planetsForDeg.length)
+                        //     : null;
                         // Determine House Number relative to Ascendant
                         // 1st House = Ascendant Sign
                         // House = (Sign Index - Asc Index + 12) % 12 + 1
@@ -440,22 +442,26 @@ function Dashboard() {
     _s();
     const [data, setData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
-    const loadData = async ()=>{
-        setLoading(true);
-        try {
-            const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["fetchCurrentPositions"])();
-            setData(res);
-        } catch (e) {
-            console.error(e);
-        } finally{
-            setLoading(false);
+    const loadData = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
+        "Dashboard.useCallback[loadData]": async ()=>{
+            setLoading(true);
+            try {
+                const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["fetchCurrentPositions"])();
+                setData(res);
+            } catch (e) {
+                console.error(e);
+            } finally{
+                setLoading(false);
+            }
         }
-    };
+    }["Dashboard.useCallback[loadData]"], []);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "Dashboard.useEffect": ()=>{
             loadData();
         }
-    }["Dashboard.useEffect"], []);
+    }["Dashboard.useEffect"], [
+        loadData
+    ]);
     if (loading && !data) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
             className: "flex h-80 items-center justify-center",
@@ -588,7 +594,7 @@ function Dashboard() {
         columnNumber: 9
     }, this);
 }
-_s(Dashboard, "Zn4cs3026OJRBhxLd0Oqj+bUOXY=");
+_s(Dashboard, "he505I0vToNnb9R2JFu+ycUlBrU=");
 _c = Dashboard;
 function PlanetCard({ planet }) {
     const isRetro = planet.retrograde;

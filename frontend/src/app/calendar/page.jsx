@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { fetchCalendar } from '../../services/api';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -12,7 +12,7 @@ export default function Calendar() {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         try {
             const res = await fetchCalendar(year, month);
@@ -22,11 +22,11 @@ export default function Calendar() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [year, month]);
 
     useEffect(() => {
         loadData();
-    }, [year, month]);
+    }, [loadData]);
 
     const changeMonth = (delta) => {
         setDate(d => {
