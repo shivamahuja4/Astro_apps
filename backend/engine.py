@@ -486,13 +486,16 @@ def calculate_monthly_events(year: int, month: int):
                         sign_str = ZODIAC_SIGNS[int(p1_pos_exact / 30)]
                         
                         aspect_name = "Conjunction" if target == 0 else "Opposition" if target == 180 else "Trine (120)"
+                        event_name = f"{p1} - {p2} {aspect_name}"
+                        if aspect_name == "Conjunction":
+                            event_name = f"{p1} - {p2} Conjunction ({sign_str})"
                         
                         events.append({
                             "date": ist_date.isoformat(),
                             "display_date": ist_date.strftime("%d %b %Y"),
                             "time": ist_date.strftime("%I:%M %p"),
                             "type": aspect_name,
-                            "event_name": f"{p1} - {p2} {aspect_name}",
+                            "event_name": event_name,
                             "degree": f"{sign_str} {deg_str}"
                         })
         
