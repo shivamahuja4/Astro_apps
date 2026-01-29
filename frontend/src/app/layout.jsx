@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
 
                     <Navbar />
 
-                    <main className="relative z-10 max-w-6xl mx-auto px-6 lg:px-8 py-10">
+                    <main className="relative z-10 max-w-6xl mx-auto px-6 lg:px-8 pt-24 pb-10">
                         {children}
                     </main>
 

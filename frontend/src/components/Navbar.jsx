@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
     return (
-        <nav className="relative z-10 border-b border-white/[0.04] bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0">
+        <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.04] bg-[#0a0a0f]/80 backdrop-blur-2xl">
             <div className="max-w-6xl mx-auto px-6 lg:px-8">
                 <div className="flex items-center justify-between h-14">
                     <Link href="/" className="text-lg font-semibold tracking-tight text-white/90 hover:text-white transition-colors">
