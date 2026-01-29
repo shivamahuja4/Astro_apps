@@ -86,7 +86,7 @@ export default function Calendar() {
                             {data.map((event, idx) => {
                                 const isPast = new Date(event.date) < new Date();
                                 return (
-                                    <tr key={idx} className={`transition-colors ${isPast ? 'opacity-80' : 'hover:bg-white/[0.02]'}`}>
+                                    <tr key={idx} className={`transition-colors ${isPast ? 'opacity-90' : 'hover:bg-white/[0.02]'}`}>
                                         <td className="px-5 py-4 whitespace-nowrap">
                                             <p className="text-sm text-white/80">{event.display_date}</p>
                                             <p className="text-xs text-white/30">{event.time} IST</p>
