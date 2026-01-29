@@ -83,23 +83,26 @@ export default function Calendar() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/[0.04]">
-                            {data.map((event, idx) => (
-                                <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
-                                    <td className="px-5 py-4 whitespace-nowrap">
-                                        <p className="text-sm text-white/80">{event.display_date}</p>
-                                        <p className="text-xs text-white/30">{event.time} IST</p>
-                                    </td>
-                                    <td className="px-5 py-4 whitespace-nowrap">
-                                        <p className="text-sm font-medium text-white/90">{event.event_name}</p>
-                                    </td>
-                                    <td className="px-5 py-4 whitespace-nowrap hidden sm:table-cell">
-                                        <EventBadge type={event.type} />
-                                    </td>
-                                    <td className="px-5 py-4 whitespace-nowrap hidden md:table-cell">
-                                        <p className="text-sm font-mono text-white/50">{event.degree}</p>
-                                    </td>
-                                </tr>
-                            ))}
+                            {data.map((event, idx) => {
+                                const isPast = new Date(event.date) < new Date();
+                                return (
+                                    <tr key={idx} className={`transition-colors ${isPast ? 'opacity-90' : 'hover:bg-white/[0.02]'}`}>
+                                        <td className="px-5 py-4 whitespace-nowrap">
+                                            <p className="text-sm text-white/80">{event.display_date}</p>
+                                            <p className="text-xs text-white/30">{event.time} IST</p>
+                                        </td>
+                                        <td className="px-5 py-4 whitespace-nowrap">
+                                            <p className="text-sm font-medium text-white/90">{event.event_name}</p>
+                                        </td>
+                                        <td className="px-5 py-4 whitespace-nowrap hidden sm:table-cell">
+                                            <EventBadge type={event.type} />
+                                        </td>
+                                        <td className="px-5 py-4 whitespace-nowrap hidden md:table-cell">
+                                            <p className="text-sm font-mono text-white/50">{event.degree}</p>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
