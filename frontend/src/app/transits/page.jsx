@@ -125,6 +125,11 @@ function TransitRow({ transit }) {
             {/* Transit info */}
             <div className="flex items-center gap-3 flex-1 min-w-0">
                 <span className="font-medium text-white/90">{transit.planet}</span>
+                {transit.is_retrograde && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                        Retrograde
+                    </span>
+                )}
                 <span className="text-white/30">→</span>
                 <span className="font-medium text-violet-300">{transit.to_sign}</span>
             </div>

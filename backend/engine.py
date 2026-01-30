@@ -273,12 +273,21 @@ def calculate_transits(year: int, planet_name: str = None):
                 ingress_dt_utc = datetime(year_i, month_i, day_i, h, m, s, tzinfo=pytz.utc)
                 ingress_dt_ist = ingress_dt_utc.astimezone(pytz.timezone('Asia/Kolkata'))
                 
+                # Get speed at ingress to check retrograde
+                if name == 'Ketu':
+                    _, speed_at_ingress = get_planet_position_speed(ingress_jd, 'Ketu', None)
+                else:
+                    _, speed_at_ingress = get_planet_position_speed(ingress_jd, name, planet_id)
+                
+                is_retrograde = speed_at_ingress < 0
+
                 transits.append({
                     "planet": name,
                     "from_sign": ZODIAC_SIGNS[curr_sign],
                     "to_sign": ZODIAC_SIGNS[next_sign],
                     "iso_time": ingress_dt_ist.isoformat(),
-                    "display_time": ingress_dt_ist.strftime("%d %b %Y, %I:%M %p")
+                    "display_time": ingress_dt_ist.strftime("%d %b %Y, %I:%M %p"),
+                    "is_retrograde": is_retrograde
                 })
                 
                 curr_sign = next_sign
