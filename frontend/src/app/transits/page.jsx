@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import { fetchTransits } from '../../services/api';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useCalculationMethod } from '../../context/CalculationMethodContext';
 
 const PLANETS = ['Sun', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu', 'Uranus', 'Neptune', 'Pluto'];
 
 export default function Transits() {
+    const { method } = useCalculationMethod();
     const [year, setYear] = useState(new Date().getFullYear());
     const [selectedPlanet, setSelectedPlanet] = useState(null);
     const [data, setData] = useState([]);
@@ -15,7 +17,7 @@ export default function Transits() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const res = await fetchTransits(year, selectedPlanet || undefined);
+            const res = await fetchTransits(year, selectedPlanet || undefined, method);
             setData(res.transits);
         } catch (e) {
             console.error(e);
@@ -26,7 +28,7 @@ export default function Transits() {
 
     useEffect(() => {
         loadData();
-    }, [year, selectedPlanet]);
+    }, [year, selectedPlanet, method]);
 
     return (
         <div className="space-y-8">

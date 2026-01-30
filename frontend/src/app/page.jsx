@@ -4,15 +4,17 @@ import { useEffect, useState } from 'react';
 import { fetchCurrentPositions } from '../services/api';
 import { RefreshCw } from 'lucide-react';
 import ZodiacChart from '../components/ZodiacChart';
+import { useCalculationMethod } from '../context/CalculationMethodContext';
 
 export default function Dashboard() {
+    const { method } = useCalculationMethod();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const loadData = async () => {
         setLoading(true);
         try {
-            const res = await fetchCurrentPositions();
+            const res = await fetchCurrentPositions(method);
             setData(res);
         } catch (e) {
             console.error(e);
@@ -23,7 +25,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [method]);
 
     if (loading && !data) {
         return (
