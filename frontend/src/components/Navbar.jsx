@@ -13,6 +13,7 @@ export default function Navbar() {
                     </Link>
                     <div className="flex items-center gap-1">
                         <NavLink href="/">Positions</NavLink>
+                        <NavLink href="/birthchart">Birth Chart</NavLink>
                         <NavLink href="/transits">Transits</NavLink>
                         <NavLink href="/calendar">Calendar</NavLink>
                     </div>

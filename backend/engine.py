@@ -50,10 +50,15 @@ def get_julian_day(dt: datetime):
     return swe.julday(dt_utc.year, dt_utc.month, dt_utc.day, 
                       dt_utc.hour + dt_utc.minute/60.0 + dt_utc.second/3600.0)
 
-def calculate_positions(dt: datetime):
+def calculate_positions(dt: datetime, lat: float = 28.6139, lon: float = 77.2090):
     """
-    Calculate planetary positions for a given datetime.
+    Calculate planetary positions for a given datetime and location.
     Uses Lahiri Ayanamsa (Sidereal).
+    
+    Args:
+        dt: datetime object (timezone-aware)
+        lat: latitude for Ascendant calculation (default: New Delhi)
+        lon: longitude for Ascendant calculation (default: New Delhi)
     """
     jd = get_julian_day(dt)
     
@@ -133,10 +138,7 @@ def calculate_positions(dt: datetime):
         })
         
         
-    # Calculate Ascendant (Lagna) - Using New Delhi as default for IST
-    lat = 28.6139
-    lon = 77.2090
-    
+    # Calculate Ascendant (Lagna) - Using provided coordinates
     # swe.houses_ex returns (cusps, ascmc)
     # ascmc[0] is Ascendant
     flags_houses = swe.FLG_SIDEREAL | swe.FLG_SWIEPH
@@ -601,3 +603,148 @@ def calculate_monthly_events(year: int, month: int):
         
     events.sort(key=lambda x: x['date'])
     return events
+
+
+def calculate_houses(dt: datetime, lat: float, lon: float):
+    """
+    Calculate house cusps for a given datetime and location.
+    Uses Whole Sign house system (traditional Vedic).
+    
+    Returns:
+        List of house info with cusp degrees and signs
+    """
+    jd = get_julian_day(dt)
+    swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
+    
+    # Get house cusps using Placidus for reference, but we'll use Whole Sign
+    flags_houses = swe.FLG_SIDEREAL | swe.FLG_SWIEPH
+    cusps, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags_houses)
+    
+    # Ascendant degree
+    asc_deg = ascmc[0]
+    asc_sign_index = int(asc_deg / 30)
+    
+    houses = []
+    for i in range(12):
+        # Whole Sign: each house starts at 0° of the sign
+        house_sign_index = (asc_sign_index + i) % 12
+        house_cusp = house_sign_index * 30  # Start of the sign
+        
+        houses.append({
+            "house": i + 1,
+            "sign": ZODIAC_SIGNS[house_sign_index],
+            "cusp_degree": house_cusp,
+            "cusp_degree_str": f"0° 0' 0\""  # Whole sign starts at 0
+        })
+    
+    return houses
+
+
+def calculate_aspects(positions: list, orb_major: float = 8.0, orb_minor: float = 5.0):
+    """
+    Calculate aspects between planets.
+    
+    Aspect types and orbs:
+    - Conjunction (0°): 5° orb
+    - Sextile (60°): 5° orb
+    - Square (90°): 5° orb
+    - Trine (120°): 8° orb
+    - Opposition (180°): 8° orb
+    
+    Args:
+        positions: List of planet positions with 'name' and 'full_degree'
+        orb_major: Orb for trine and opposition (default 8°)
+        orb_minor: Orb for conjunction, sextile, square (default 5°)
+    
+    Returns:
+        List of aspect dictionaries
+    """
+    ASPECT_TYPES = {
+        0: {"name": "Conjunction", "symbol": "☌", "orb": orb_minor},
+        60: {"name": "Sextile", "symbol": "⚹", "orb": orb_minor},
+        90: {"name": "Square", "symbol": "□", "orb": orb_minor},
+        120: {"name": "Trine", "symbol": "△", "orb": orb_major},
+        180: {"name": "Opposition", "symbol": "☍", "orb": orb_major},
+    }
+    
+    aspects = []
+    
+    # Get planet names (exclude Ascendant for aspects)
+    planet_list = [p for p in positions if p['name'] != 'Ascendant']
+    
+    for i in range(len(planet_list)):
+        for j in range(i + 1, len(planet_list)):
+            p1 = planet_list[i]
+            p2 = planet_list[j]
+            
+            # Calculate angular separation
+            diff = abs(p1['full_degree'] - p2['full_degree'])
+            if diff > 180:
+                diff = 360 - diff
+            
+            # Check each aspect type
+            for angle, aspect_info in ASPECT_TYPES.items():
+                orb_allowed = aspect_info['orb']
+                actual_orb = abs(diff - angle)
+                
+                if actual_orb <= orb_allowed:
+                    # Aspect found!
+                    aspects.append({
+                        "planet1": p1['name'],
+                        "planet2": p2['name'],
+                        "aspect": aspect_info['name'],
+                        "symbol": aspect_info['symbol'],
+                        "angle": angle,
+                        "orb": round(actual_orb, 2),
+                        "applying": None  # Could calculate if approaching or separating
+                    })
+                    break  # One aspect per pair
+    
+    # Sort by orb (tighter aspects first)
+    aspects.sort(key=lambda x: x['orb'])
+    
+    return aspects
+
+
+def calculate_birth_chart(dt: datetime, lat: float, lon: float):
+    """
+    Calculate complete birth chart data including positions, houses, and aspects.
+    
+    Returns:
+        Dictionary with positions, houses, and aspects
+    """
+    # Get planetary positions
+    positions = calculate_positions(dt, lat, lon)
+    
+    # Add house placements to positions
+    jd = get_julian_day(dt)
+    swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
+    flags_houses = swe.FLG_SIDEREAL | swe.FLG_SWIEPH
+    _, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags_houses)
+    asc_deg = ascmc[0]
+    asc_sign_index = int(asc_deg / 30)
+    
+    # Calculate house for each planet (Whole Sign)
+    for planet in positions:
+        if planet['name'] == 'Ascendant':
+            planet['house'] = 1
+        else:
+            planet_sign_index = int(planet['full_degree'] / 30)
+            # House = (planet_sign - asc_sign) % 12 + 1
+            house = ((planet_sign_index - asc_sign_index) % 12) + 1
+            planet['house'] = house
+        
+        # Add motion status
+        planet['motion'] = 'Retrograde' if planet.get('retrograde') else 'Direct'
+    
+    # Get house cusps
+    houses = calculate_houses(dt, lat, lon)
+    
+    # Get aspects
+    aspects = calculate_aspects(positions)
+    
+    return {
+        "positions": positions,
+        "houses": houses,
+        "aspects": aspects
+    }
