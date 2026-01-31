@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { fetchCalendar } from '../../services/api';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useCalculationMethod } from '../../context/CalculationMethodContext';
 
 export default function Calendar() {
+    const { method } = useCalculationMethod();
     const [date, setDate] = useState(new Date());
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -15,7 +17,7 @@ export default function Calendar() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const res = await fetchCalendar(year, month);
+            const res = await fetchCalendar(year, month, method);
             setData(res.events);
         } catch (e) {
             console.error(e);
@@ -26,7 +28,7 @@ export default function Calendar() {
 
     useEffect(() => {
         loadData();
-    }, [year, month]);
+    }, [year, month, method]);
 
     const changeMonth = (delta) => {
         setDate(d => {

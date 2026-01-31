@@ -50,15 +50,19 @@ def get_julian_day(dt: datetime):
     return swe.julday(dt_utc.year, dt_utc.month, dt_utc.day, 
                       dt_utc.hour + dt_utc.minute/60.0 + dt_utc.second/3600.0)
 
-def calculate_positions(dt: datetime):
+def calculate_positions(dt: datetime, method: str = "sidereal"):
     """
     Calculate planetary positions for a given datetime.
-    Uses Lahiri Ayanamsa (Sidereal).
+    Defaults to Lahiri Ayanamsa (Sidereal).
     """
     jd = get_julian_day(dt)
     
-    # Set Sidereal Mode (Lahiri)
-    swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
+    # Flags and Sidereal Mode setup
+    flags = swe.FLG_SWIEPH | swe.FLG_SPEED
+    if method == "sidereal":
+        swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
+        flags |= swe.FLG_SIDEREAL
+    # For tropical, we just don't set FLG_SIDEREAL
     
     positions = []
     
@@ -67,7 +71,7 @@ def calculate_positions(dt: datetime):
             # Calculate Rahu first, then Ketu is opposite
             # We already handle Rahu in the loop, so we can check if Rahu data exists or just recalculate
             # Use 'Rahu' (Mean Node) position + 180 degrees
-            rahu_res = swe.calc_ut(jd, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)
+            rahu_res = swe.calc_ut(jd, swe.MEAN_NODE, flags)
              # swe.calc_ut returns ( (long, lat, dist, speed_long, ...), rflag )
              # Wait, pyswisseph documentation says:
              # calc_ut(jd, planet, flags) -> ((longitude, latitude, distance, speed_long, speed_lat, speed_dist), rflag)
@@ -96,11 +100,7 @@ def calculate_positions(dt: datetime):
             })
             continue
 
-        # Calculate position
-        # FLG_SWIEPH: use Swiss Ephemeris
-        # FLG_SIDEREAL: sidereal zodiac
-        # FLG_SPEED: to get speed for retrograde check
-        flags = swe.FLG_SWIEPH | swe.FLG_SIDEREAL | swe.FLG_SPEED
+        # Planet Flags already contains method related flags
         res = swe.calc_ut(jd, planet_id, flags)
         
         # res is ((long, lat, dist, speed_long, ...), rflag)
@@ -139,7 +139,10 @@ def calculate_positions(dt: datetime):
     
     # swe.houses_ex returns (cusps, ascmc)
     # ascmc[0] is Ascendant
-    flags_houses = swe.FLG_SIDEREAL | swe.FLG_SWIEPH
+    flags_houses = swe.FLG_SWIEPH
+    if method == "sidereal":
+        flags_houses |= swe.FLG_SIDEREAL
+        
     cusps, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags_houses)
     asc_deg = ascmc[0]
     
@@ -163,13 +166,16 @@ def calculate_positions(dt: datetime):
 def get_sign_from_longitude(lon):
     return int(lon / 30)
 
-def calculate_transits(year: int, planet_name: str = None):
+def calculate_transits(year: int, planet_name: str = None, method: str = "sidereal"):
     """
     Calculate transits (sign changes) for a specific year.
     If planet_name is provided, calculate only for that planet.
     Otherwise calculate for all planets (excluding Moon if year view).
     """
-    swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
+    flags = swe.FLG_SWIEPH
+    if method == "sidereal":
+        swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
+        flags |= swe.FLG_SIDEREAL
     
     start_date = datetime(year, 1, 1, tzinfo=pytz.utc)
     end_date = datetime(year + 1, 1, 1, tzinfo=pytz.utc)
@@ -208,10 +214,10 @@ def calculate_transits(year: int, planet_name: str = None):
         
         # Get initial position
         if name == 'Ketu':
-             rahu_pos = swe.calc_ut(current_jd, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+             rahu_pos = swe.calc_ut(current_jd, swe.MEAN_NODE, flags)[0][0]
              curr_pos = (rahu_pos + 180) % 360
         else:
-             curr_pos = swe.calc_ut(current_jd, planet_id, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+             curr_pos = swe.calc_ut(current_jd, planet_id, flags)[0][0]
              
         curr_sign = get_sign_from_longitude(curr_pos)
         
@@ -226,10 +232,10 @@ def calculate_transits(year: int, planet_name: str = None):
             next_jd = current_jd + step
             
             if name == 'Ketu':
-                 rahu_pos = swe.calc_ut(next_jd, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                 rahu_pos = swe.calc_ut(next_jd, swe.MEAN_NODE, flags)[0][0]
                  next_pos = (rahu_pos + 180) % 360
             else:
-                 next_pos = swe.calc_ut(next_jd, planet_id, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                 next_pos = swe.calc_ut(next_jd, planet_id, flags)[0][0]
             
             next_sign = get_sign_from_longitude(next_pos)
             
@@ -246,10 +252,10 @@ def calculate_transits(year: int, planet_name: str = None):
                 for _ in range(10): # 10 iterations is usually enough precision
                     mid = (left + right) / 2
                     if name == 'Ketu':
-                        r_p = swe.calc_ut(mid, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                        r_p = swe.calc_ut(mid, swe.MEAN_NODE, flags)[0][0]
                         mid_pos = (r_p + 180) % 360
                     else:
-                        mid_pos = swe.calc_ut(mid, planet_id, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                        mid_pos = swe.calc_ut(mid, planet_id, flags)[0][0]
                     
                     mid_sign = get_sign_from_longitude(mid_pos)
                     
@@ -275,9 +281,9 @@ def calculate_transits(year: int, planet_name: str = None):
                 
                 # Get speed at ingress to check retrograde
                 if name == 'Ketu':
-                    _, speed_at_ingress = get_planet_position_speed(ingress_jd, 'Ketu', None)
+                    _, speed_at_ingress = get_planet_position_speed(ingress_jd, 'Ketu', None, method)
                 else:
-                    _, speed_at_ingress = get_planet_position_speed(ingress_jd, name, planet_id)
+                    _, speed_at_ingress = get_planet_position_speed(ingress_jd, name, planet_id, method)
                 
                 is_retrograde = speed_at_ingress < 0
 
@@ -301,25 +307,34 @@ def calculate_transits(year: int, planet_name: str = None):
     return transits
 
 
-def get_planet_position_speed(jd, planet_name, planet_id):
+def get_planet_position_speed(jd, planet_name, planet_id, method: str = "sidereal"):
     """Helper to get pos/speed for specific planet/node"""
+    flags = swe.FLG_SWIEPH | swe.FLG_SPEED
+    if method == "sidereal":
+        # Note: Mode should be set by caller for global efficiency, but we can set it here too if needed
+        # swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
+        flags |= swe.FLG_SIDEREAL
+
     if planet_name == 'Ketu':
-        rahu_res = swe.calc_ut(jd, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL | swe.FLG_SPEED)
+        rahu_res = swe.calc_ut(jd, swe.MEAN_NODE, flags)
         rahu_pos = rahu_res[0][0]
         rahu_speed = rahu_res[0][3]
         return (rahu_pos + 180) % 360, rahu_speed # Ketu speed same as Rahu (mean node)
     else:
-        res = swe.calc_ut(jd, planet_id, swe.FLG_SWIEPH | swe.FLG_SIDEREAL | swe.FLG_SPEED)
+        res = swe.calc_ut(jd, planet_id, flags)
         return res[0][0], res[0][3]
 
-def calculate_monthly_events(year: int, month: int):
+def calculate_monthly_events(year: int, month: int, method: str = "sidereal"):
     """
     Calculate astrological events for a specific month.
     Includes:
     - Aspects (Conjunction 0, Trine 120, Opposition 180)
     - Retrograde movements (Start/End)
     """
-    swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
+    flags = swe.FLG_SWIEPH
+    if method == "sidereal":
+        swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
+        flags |= swe.FLG_SIDEREAL
     
     # Range: from 1st of month to 1st of next month
     start_date = datetime(year, month, 1, tzinfo=pytz.utc)
@@ -344,12 +359,12 @@ def calculate_monthly_events(year: int, month: int):
         if name in ['Sun', 'Moon', 'Rahu', 'Ketu']: continue # These don't have standard retro cycles (Sun/Moon never, Nodes always retro/weird)
         
         current_jd = start_jd
-        _, prev_speed = get_planet_position_speed(current_jd, name, pid)
+        _, prev_speed = get_planet_position_speed(current_jd, name, pid, method)
         
         step = 1.0 # 1 day
         while current_jd < end_jd:
             next_jd = current_jd + step
-            _, next_speed = get_planet_position_speed(next_jd, name, pid)
+            _, next_speed = get_planet_position_speed(next_jd, name, pid, method)
             
             if (prev_speed > 0 and next_speed < 0) or (prev_speed < 0 and next_speed > 0):
                 # Speed changed sign!
@@ -359,7 +374,7 @@ def calculate_monthly_events(year: int, month: int):
                 station_jd = r
                 for _ in range(10):
                     mid = (l + r) / 2
-                    _, mid_speed = get_planet_position_speed(mid, name, pid)
+                    _, mid_speed = get_planet_position_speed(mid, name, pid, method)
                     # We want speed 0, usually transition point is between + and -
                     if (prev_speed > 0 and mid_speed > 0) or (prev_speed < 0 and mid_speed < 0):
                          l = mid
@@ -375,7 +390,7 @@ def calculate_monthly_events(year: int, month: int):
                 ist_date = e_date.astimezone(pytz.timezone('Asia/Kolkata'))
                 
                  # Get position at station
-                pos_station, _ = get_planet_position_speed(station_jd, name, pid)
+                pos_station, _ = get_planet_position_speed(station_jd, name, pid, method)
                 deg_str = format_degree(pos_station % 30)
                 sign_str = ZODIAC_SIGNS[int(pos_station / 30)]
                 
@@ -413,14 +428,14 @@ def calculate_monthly_events(year: int, month: int):
     # Store as {name: pos}
     prev_positions = {}
     for name, pid in planet_list:
-        p, _ = get_planet_position_speed(current_jd, name, pid)
+        p, _ = get_planet_position_speed(current_jd, name, pid, method)
         prev_positions[name] = p
         
     while current_jd < end_jd:
         next_jd = current_jd + step
         next_positions = {}
         for name, pid in planet_list:
-            p, _ = get_planet_position_speed(next_jd, name, pid)
+            p, _ = get_planet_position_speed(next_jd, name, pid, method)
             next_positions[name] = p
             
         # Check pairs (exclude Moon to reduce noise in calendar)
@@ -488,7 +503,7 @@ def calculate_monthly_events(year: int, month: int):
                         ist_date = e_date.astimezone(pytz.timezone('Asia/Kolkata'))
                         
                         # Pos at exact time
-                        p1_pos_exact, _ = get_planet_position_speed(exact_jd, p1, PLANETS[p1])
+                        p1_pos_exact, _ = get_planet_position_speed(exact_jd, p1, PLANETS[p1], method)
                         # p2_pos_exact same...
                         
                         deg_str = format_degree(p1_pos_exact % 30)
@@ -521,10 +536,10 @@ def calculate_monthly_events(year: int, month: int):
         
         # Get initial position and sign
         if name == 'Ketu':
-            rahu_pos = swe.calc_ut(current_jd, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+            rahu_pos = swe.calc_ut(current_jd, swe.MEAN_NODE, flags)[0][0]
             curr_pos = (rahu_pos + 180) % 360
         else:
-            curr_pos = swe.calc_ut(current_jd, pid, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+            curr_pos = swe.calc_ut(current_jd, pid, flags)[0][0]
         
         curr_sign = get_sign_from_longitude(curr_pos)
         
@@ -535,10 +550,10 @@ def calculate_monthly_events(year: int, month: int):
             next_jd = current_jd + step
             
             if name == 'Ketu':
-                rahu_pos = swe.calc_ut(next_jd, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                rahu_pos = swe.calc_ut(next_jd, swe.MEAN_NODE, flags)[0][0]
                 next_pos = (rahu_pos + 180) % 360
             else:
-                next_pos = swe.calc_ut(next_jd, pid, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                next_pos = swe.calc_ut(next_jd, pid, flags)[0][0]
             
             next_sign = get_sign_from_longitude(next_pos)
             
@@ -551,10 +566,10 @@ def calculate_monthly_events(year: int, month: int):
                 for _ in range(10):
                     mid = (left + right) / 2
                     if name == 'Ketu':
-                        r_p = swe.calc_ut(mid, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                        r_p = swe.calc_ut(mid, swe.MEAN_NODE, flags)[0][0]
                         mid_pos = (r_p + 180) % 360
                     else:
-                        mid_pos = swe.calc_ut(mid, pid, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                        mid_pos = swe.calc_ut(mid, pid, flags)[0][0]
                     
                     mid_sign = get_sign_from_longitude(mid_pos)
                     
@@ -577,10 +592,10 @@ def calculate_monthly_events(year: int, month: int):
                 
                 # Get position for degree display
                 if name == 'Ketu':
-                    r_p = swe.calc_ut(ingress_jd, swe.MEAN_NODE, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                    r_p = swe.calc_ut(ingress_jd, swe.MEAN_NODE, flags)[0][0]
                     pos_at_ingress = (r_p + 180) % 360
                 else:
-                    pos_at_ingress = swe.calc_ut(ingress_jd, pid, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0]
+                    pos_at_ingress = swe.calc_ut(ingress_jd, pid, flags)[0][0]
                 
                 deg_str = format_degree(pos_at_ingress % 30)
                 sign_str = ZODIAC_SIGNS[next_sign]
